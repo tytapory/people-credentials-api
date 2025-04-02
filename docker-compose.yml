@@ -1,0 +1,44 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:13
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=user_creds_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d user_creds_db'"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - ./db/migrations:/migrations
+    command: ["-path", "/migrations", "-database",  "postgres://postgres:password@db:5432/user_creds_db?sslmode=disable", "up", "2"]
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+
+  server:
+    build: .
+    environment:
+      - PEOPLE_CREDENTIALS_DATABASE_HOST=db
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    command: go run cmd/app/main.go
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
