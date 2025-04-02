@@ -1,0 +1,196 @@
+definitions:
+  models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  models.InsertPersonRequest:
+    properties:
+      name:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+  models.Person:
+    properties:
+      age:
+        type: integer
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      nationality:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+  models.SearchResponse:
+    properties:
+      persons:
+        items:
+          $ref: '#/definitions/models.Person'
+        type: array
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/person/create:
+    post:
+      consumes:
+      - application/json
+      description: Enriches provided person details using external APIs and creates
+        a new person record in the database.
+      parameters:
+      - description: Insert Person Request
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/models.InsertPersonRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Create a New Person
+      tags:
+      - person
+  /api/v1/person/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a person record identified by the provided ID.
+      parameters:
+      - description: Person ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Delete a Person
+      tags:
+      - person
+  /api/v1/person/edit:
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing person's details based on the provided ID and
+        payload.
+      parameters:
+      - description: Person ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: Person Data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/models.Person'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Edit an Existing Person
+      tags:
+      - person
+  /api/v1/search:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of persons based on provided filter criteria with
+        pagination support.
+      parameters:
+      - description: Filter by Person ID
+        in: query
+        name: id
+        type: integer
+      - description: Filter by first name
+        in: query
+        name: name
+        type: string
+      - description: Filter by surname
+        in: query
+        name: surname
+        type: string
+      - description: Filter by patronymic
+        in: query
+        name: patronymic
+        type: string
+      - description: Filter by age
+        in: query
+        name: age
+        type: integer
+      - description: Filter by gender
+        in: query
+        name: gender
+        type: string
+      - description: Filter by nationality
+        in: query
+        name: nationality
+        type: string
+      - description: Page number for pagination
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Search results
+          schema:
+            $ref: '#/definitions/models.SearchResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Search for Persons
+      tags:
+      - person
+swagger: "2.0"
